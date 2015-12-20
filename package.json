@@ -1,0 +1,21 @@
+{
+  "name": "rurple.js",
+  "version": "0.0.0",
+  "description": "JavasScript RUR-PLE",
+  "main": "dist/rurple.min.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Qwaz/rurple.js.git"
+  },
+  "author": "Qwaz",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.3.21",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.3.13",
+    "gulp": "^3.9.0",
+    "gulp-util": "^3.0.7",
+    "webpack": "^1.12.9"
+  }
+}
