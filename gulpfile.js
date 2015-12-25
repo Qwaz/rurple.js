@@ -2,7 +2,8 @@ var path = require('path');
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var webpack = require("webpack");
+var webpack = require('webpack');
+var WebpackDevServer = require('webpack-dev-server');
 var WebpackNotifierPlugin = require('webpack-notifier');
 
 var srcPath = path.resolve(__dirname, 'src');
@@ -12,6 +13,7 @@ var webpackConfig = {
     entry: './rurple',
     output: {
         path: path.resolve(__dirname, 'dist'),
+        publicPath: 'dist/',
         filename: 'rurple.js',
         library: 'rurple',
         libraryTarget: 'umd'
@@ -61,5 +63,21 @@ gulp.task('min', function (callback) {
             colors: true
         }));
         callback();
+    });
+});
+
+gulp.task('server', function (callback) {
+    var config = Object.create(webpackConfig);
+    config.output.filename = 'rurple.min.js';
+    config.plugins.push(new webpack.optimize.UglifyJsPlugin());
+
+    new WebpackDevServer(webpack(config), {
+        publicPath: "/" + config.output.publicPath,
+        stats: {
+            colors: true
+        }
+    }).listen(8080, "localhost", function (err) {
+        if (err) throw new gutil.PluginError("webpack-dev-server", err);
+        gutil.log("[webpack-dev-server]", "http://localhost:8080/webpack-dev-server/demo/test.html");
     });
 });

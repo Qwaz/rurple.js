@@ -44,7 +44,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.c = installedModules;
 
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "dist/";
 
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -96,14 +96,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        config = config || {};
 	        config.width = config.width || 800;
 	        config.height = config.height || 600;
+	        config.backgroundColor = config.hasOwnProperty('backgroundColor') ? config.backgroundColor : 0xABCDEF;
 	        this.config = config;
+
+	        this.stage = new PIXI.Container();
 	    }
 
 	    _createClass(Player, [{
 	        key: 'initRenderer',
 	        value: function initRenderer(element) {
-	            this.renderer = PIXI.autoDetectRenderer(this.config.width, this.config.height, { backgroundColor: 0xABCDEF });
+	            console.log(this.config.backgroundColor);
+	            this.renderer = PIXI.autoDetectRenderer(this.config.width, this.config.height, {
+	                backgroundColor: this.config.backgroundColor
+	            });
 	            element.appendChild(this.renderer.view);
+	        }
+	    }, {
+	        key: 'startAnimate',
+	        value: function startAnimate() {
+	            var _this = this;
+
+	            var animate = function animate() {
+	                requestAnimationFrame(animate);
+	                _this.renderer.render(_this.stage);
+	            };
+	            animate();
 	        }
 	    }]);
 
