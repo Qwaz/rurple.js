@@ -1,7 +1,2 @@
-import * as test from "test";
-
-module.exports = class Rurple {
-    constructor(canvas) {
-        console.log(test.text);
-    }
-};
+import * as player from './player';
+export let Player = player.default;

@@ -3,6 +3,7 @@ var path = require('path');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var webpack = require("webpack");
+var WebpackNotifierPlugin = require('webpack-notifier');
 
 var srcPath = path.resolve(__dirname, 'src');
 
@@ -12,12 +13,11 @@ var webpackConfig = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'rurple.js',
-        library: 'Rurple',
+        library: 'rurple',
         libraryTarget: 'umd'
     },
-    resolve: {
-        extensions: ['', '.js'],
-        modulesDirectories: ['src', 'node_modules']
+    externals: {
+        pixi: 'PIXI'
     },
     module: {
         loaders: [
@@ -28,7 +28,12 @@ var webpackConfig = {
             }
         ]
     },
-    plugins: []
+    plugins: [
+        new WebpackNotifierPlugin({
+            title: 'rurple.js',
+            alwaysNotify: true
+        })
+    ]
 };
 
 gulp.task('default', ['build']);

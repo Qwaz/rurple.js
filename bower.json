@@ -1,0 +1,26 @@
+{
+  "name": "rurple.js",
+  "description": "JavasScript RUR-PLE",
+  "main": "dist/rurple.min.js",
+  "authors": [
+    "Qwaz"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Qwaz/rurple.js",
+  "moduleType": [
+    "amd",
+    "es6",
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "pixi.js": "pixi#~3.0.8"
+  }
+}
