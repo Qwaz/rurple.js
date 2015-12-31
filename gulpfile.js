@@ -68,8 +68,6 @@ gulp.task('min', function (callback) {
 
 gulp.task('server', function (callback) {
     var config = Object.create(webpackConfig);
-    config.output.filename = 'rurple.min.js';
-    config.plugins.push(new webpack.optimize.UglifyJsPlugin());
 
     new WebpackDevServer(webpack(config), {
         publicPath: "/" + config.output.publicPath,

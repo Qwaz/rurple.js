@@ -6,11 +6,10 @@
 </head>
 <body>
 <script src="../bower_components/pixi.js/bin/pixi.min.js"></script>
-<script src="../dist/rurple.min.js"></script>
+<script src="../dist/rurple.js"></script>
 <script>
     var player = new rurple.Player();
-    player.initRenderer(document.body);
-    player.startAnimate();
+    player.attachAt(document.body);
 </script>
 </body>
 </html>
