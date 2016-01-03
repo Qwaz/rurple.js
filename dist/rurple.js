@@ -61,9 +61,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.Player = undefined;
 
-	var _player = __webpack_require__(1);
+	var _Player = __webpack_require__(1);
 
-	var player = _interopRequireWildcard(_player);
+	var player = _interopRequireWildcard(_Player);
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -81,13 +81,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 
-	var _map_container = __webpack_require__(2);
+	var _MapDrawer = __webpack_require__(2);
 
-	var _map_container2 = _interopRequireDefault(_map_container);
+	var _MapDrawer2 = _interopRequireDefault(_MapDrawer);
 
-	var _map_data = __webpack_require__(4);
+	var _MapData = __webpack_require__(4);
 
-	var _map_data2 = _interopRequireDefault(_map_data);
+	var _MapData2 = _interopRequireDefault(_MapData);
+
+	var _RobotControl = __webpack_require__(5);
+
+	var _RobotControl2 = _interopRequireDefault(_RobotControl);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -97,14 +101,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function Player(mapData, rendererConfig) {
 	        _classCallCheck(this, Player);
 
-	        this.mapData = new _map_data2.default(mapData);
-	        this.map = new _map_container2.default(rendererConfig, this.mapData);
+	        this.mapData = new _MapData2.default(mapData);
+	        this.mapDrawer = new _MapDrawer2.default(rendererConfig, this.mapData);
+	        this.robotControl = new _RobotControl2.default(this.mapDrawer, this.mapData);
 	    }
 
 	    _createClass(Player, [{
 	        key: 'attachAt',
 	        value: function attachAt(element) {
-	            element.appendChild(this.map.renderer.view);
+	            element.appendChild(this.mapDrawer.renderer.view);
 	            this.startAnimate();
 	        }
 	    }, {
@@ -114,7 +119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var animate = function animate() {
 	                requestAnimationFrame(animate);
-	                _this.map.render();
+	                _this.mapDrawer.render();
 	            };
 	            animate();
 	        }
@@ -149,13 +154,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var MapContainer = (function (_PIXI$Container) {
-	    _inherits(MapContainer, _PIXI$Container);
+	var MapDrawer = (function (_PIXI$Container) {
+	    _inherits(MapDrawer, _PIXI$Container);
 
-	    function MapContainer(config, mapData) {
-	        _classCallCheck(this, MapContainer);
+	    function MapDrawer(config, mapData) {
+	        _classCallCheck(this, MapDrawer);
 
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MapContainer).call(this));
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MapDrawer).call(this));
 
 	        config = config || {};
 	        config.renderWidth = config.renderWidth || 800;
@@ -170,10 +175,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _this.renderer = PIXI.autoDetectRenderer(_this.config.renderWidth, _this.config.renderHeight, {
 	            backgroundColor: _this.config.backgroundColor
 	        });
+
+	        _this.draw();
 	        return _this;
 	    }
 
-	    _createClass(MapContainer, [{
+	    _createClass(MapDrawer, [{
 	        key: 'draw',
 	        value: function draw() {
 	            this.graphics.clear();
@@ -200,6 +207,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.graphics.x = (this.config.renderWidth - gridSize * this.mapData.numColumns) / 2;
 	            this.graphics.y = (this.config.renderHeight - gridSize * this.mapData.numRows) / 2;
+
+	            this.gridSize = gridSize;
 	        }
 	    }, {
 	        key: 'render',
@@ -209,10 +218,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }]);
 
-	    return MapContainer;
+	    return MapDrawer;
 	})(PIXI.Container);
 
-	exports.default = MapContainer;
+	exports.default = MapDrawer;
 
 /***/ },
 /* 3 */
@@ -224,7 +233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -241,15 +250,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        data = data || {};
 	        this._numRows = data.numRows || 15;
 	        this._numColumns = data.numColumns || 15;
+	        this.robotX = data.hasOwnProperty('robotX') ? data.robotX : 1;
+	        this.robotY = data.hasOwnProperty('robotX') ? data.robotY : 1;
 	    }
 
 	    _createClass(MapData, [{
-	        key: "numRows",
+	        key: 'numRows',
 	        get: function get() {
 	            return this._numRows;
 	        }
 	    }, {
-	        key: "numColumns",
+	        key: 'numColumns',
 	        get: function get() {
 	            return this._numColumns;
 	        }
@@ -259,6 +270,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	})();
 
 	exports.default = MapData;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _pixi = __webpack_require__(3);
+
+	var PIXI = _interopRequireWildcard(_pixi);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var RobotSprite = (function (_PIXI$Container) {
+	    _inherits(RobotSprite, _PIXI$Container);
+
+	    function RobotSprite(radius) {
+	        _classCallCheck(this, RobotSprite);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RobotSprite).call(this));
+
+	        var graphics = new PIXI.Graphics();
+	        graphics.beginFill(0x222222);
+	        graphics.drawCircle(0, 0, radius);
+	        _this.addChild(graphics);
+	        return _this;
+	    }
+
+	    return RobotSprite;
+	})(PIXI.Container);
+
+	var RobotControl = (function () {
+	    function RobotControl(mapDrawer, mapData) {
+	        _classCallCheck(this, RobotControl);
+
+	        this.mapDrawer = mapDrawer;
+	        this.mapData = mapData;
+
+	        this.robot = new RobotSprite(this.mapDrawer.gridSize / 2 - 5);
+	        this.mapDrawer.addChild(this.robot);
+	        this.moveRobot(this.mapData.robotX, this.mapData.robotY);
+	    }
+
+	    _createClass(RobotControl, [{
+	        key: 'moveRobot',
+	        value: function moveRobot(x, y) {
+	            var baseX = this.mapDrawer.graphics.x - this.mapDrawer.gridSize / 2;
+	            var baseY = this.mapDrawer.graphics.y - this.mapDrawer.gridSize / 2;
+
+	            this.robot.x = baseX + x * this.mapDrawer.gridSize;
+	            this.robot.y = baseY + y * this.mapDrawer.gridSize;
+	        }
+	    }]);
+
+	    return RobotControl;
+	})();
+
+	exports.default = RobotControl;
 
 /***/ }
 /******/ ])

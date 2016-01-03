@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi';
 
-export default class MapContainer extends PIXI.Container {
+export default class MapDrawer extends PIXI.Container {
     constructor(config, mapData) {
         super();
         config = config || {};
@@ -16,6 +16,8 @@ export default class MapContainer extends PIXI.Container {
         this.renderer = PIXI.autoDetectRenderer(this.config.renderWidth, this.config.renderHeight, {
             backgroundColor: this.config.backgroundColor
         });
+
+        this.draw();
     }
 
     draw() {
@@ -46,6 +48,8 @@ export default class MapContainer extends PIXI.Container {
 
         this.graphics.x = (this.config.renderWidth - gridSize * this.mapData.numColumns) / 2;
         this.graphics.y = (this.config.renderHeight - gridSize * this.mapData.numRows) / 2;
+
+        this.gridSize = gridSize;
     }
 
     render() {

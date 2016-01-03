@@ -1,2 +1,2 @@
-import * as player from './player';
+import * as player from './Player';
 export let Player = player.default;
