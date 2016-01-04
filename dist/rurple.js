@@ -252,6 +252,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._numColumns = data.numColumns || 15;
 	        this.robotX = data.hasOwnProperty('robotX') ? data.robotX : 1;
 	        this.robotY = data.hasOwnProperty('robotX') ? data.robotY : 1;
+	        // 0 - right, 1 - down, 2 - left, 3 - up
+	        this.robotDir = data.robotDir || 0;
 	    }
 
 	    _createClass(MapData, [{
@@ -306,6 +308,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var graphics = new PIXI.Graphics();
 	        graphics.beginFill(0x222222);
 	        graphics.drawCircle(0, 0, radius);
+	        graphics.beginFill(0xFFFFFF);
+	        graphics.drawCircle(7, 0, 2);
 	        _this.addChild(graphics);
 	        return _this;
 	    }
@@ -322,17 +326,62 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.robot = new RobotSprite(this.mapDrawer.gridSize / 2 - 5);
 	        this.mapDrawer.addChild(this.robot);
-	        this.moveRobot(this.mapData.robotX, this.mapData.robotY);
+	        this.drawRobot();
 	    }
 
 	    _createClass(RobotControl, [{
-	        key: 'moveRobot',
-	        value: function moveRobot(x, y) {
+	        key: 'drawRobot',
+	        value: function drawRobot() {
 	            var baseX = this.mapDrawer.graphics.x - this.mapDrawer.gridSize / 2;
 	            var baseY = this.mapDrawer.graphics.y - this.mapDrawer.gridSize / 2;
 
-	            this.robot.x = baseX + x * this.mapDrawer.gridSize;
-	            this.robot.y = baseY + y * this.mapDrawer.gridSize;
+	            this.robot.rotation = Math.PI * 0.5 * this.mapData.robotDir;
+	            this.robot.x = baseX + this.mapData.robotX * this.mapDrawer.gridSize;
+	            this.robot.y = baseY + this.mapData.robotY * this.mapDrawer.gridSize;
+	        }
+	    }, {
+	        key: 'turnLeft',
+	        value: function turnLeft() {
+	            this.mapData.robotDir = (this.mapData.robotDir + 3) % 4;
+	            this.drawRobot();
+	        }
+	    }, {
+	        key: 'turnRight',
+	        value: function turnRight() {
+	            this.mapData.robotDir = (this.mapData.robotDir + 1) % 4;
+	            this.drawRobot();
+	        }
+	    }, {
+	        key: 'step',
+	        value: function step(onError) {
+	            var _this2 = this;
+
+	            var delta = [[1, 0], //right
+	            [0, 1], //down
+	            [-1, 0], //left
+	            [0, -1] //up
+	            ];
+
+	            var getNextMove = function getNextMove(x, y, dir) {
+	                var nextX = x + delta[dir][0];
+	                var nextY = y + delta[dir][1];
+
+	                if (1 <= nextX && nextX <= _this2.mapData.numColumns && 1 <= nextY && nextY <= _this2.mapData.numRows) {
+	                    return [nextX, nextY];
+	                } else {
+	                    return null;
+	                }
+	            };
+
+	            var next = getNextMove(this.mapData.robotX, this.mapData.robotY, this.mapData.robotDir);
+
+	            if (!next) {
+	                if (onError) onError();
+	            } else {
+	                this.mapData.robotX = next[0];
+	                this.mapData.robotY = next[1];
+	                this.drawRobot();
+	            }
 	        }
 	    }]);
 
