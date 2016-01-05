@@ -64,7 +64,7 @@ export class SimpleControl {
 
         let next = getNextMove(this.mapData.robotX, this.mapData.robotY, this.mapData.robotDir);
 
-        if (!next) {
+        if (this.mapData.wallAt(this.mapData.robotX, this.mapData.robotY)[this.mapData.robotDir]) {
             if (onError) onError();
         } else {
             this.mapData.robotX = next[0];

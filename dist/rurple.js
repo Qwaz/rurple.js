@@ -194,17 +194,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var GAP = 10;
 	            var gridSize = Math.min((this.config.renderWidth - 2 * GAP) / this.mapData.numColumns, (this.config.renderHeight - 2 * GAP) / this.mapData.numRows);
 
-	            this.graphics.lineStyle(2, this.config.lineColor, 1);
-	            for (var i = 1; i < this.mapData.numColumns; i++) {
-	                this.graphics.moveTo(i * gridSize, 0);
-	                this.graphics.lineTo(i * gridSize, this.mapData.numRows * gridSize);
+	            var BOLD = 5,
+	                LIGHT = 1;
+
+	            //vertical lines
+	            for (var x = 1; x < this.mapData.numColumns; x++) {
+	                for (var y = 0; y < this.mapData.numRows; y++) {
+	                    var index = (x - 1) * this.mapData.numRows + y;
+	                    this.graphics.lineStyle(this.mapData.verticalWalls[index] ? BOLD : LIGHT, this.config.lineColor, 1);
+	                    this.graphics.moveTo(x * gridSize, y * gridSize);
+	                    this.graphics.lineTo(x * gridSize, (y + 1) * gridSize);
+	                }
 	            }
 
-	            for (var i = 1; i < this.mapData.numColumns; i++) {
-	                this.graphics.moveTo(0, i * gridSize);
-	                this.graphics.lineTo(this.mapData.numColumns * gridSize, i * gridSize);
+	            //horizontal lines
+	            for (var y = 1; y < this.mapData.numRows; y++) {
+	                for (var x = 0; x < this.mapData.numColumns; x++) {
+	                    var index = (y - 1) * this.mapData.numColumns + x;
+	                    this.graphics.lineStyle(this.mapData.horizontalWalls[index] ? BOLD : LIGHT, this.config.lineColor, 1);
+	                    this.graphics.moveTo(x * gridSize, y * gridSize);
+	                    this.graphics.lineTo((x + 1) * gridSize, y * gridSize);
+	                }
 	            }
-	            this.graphics.lineStyle(5, this.config.lineColor, 1);
+
+	            //border
+	            this.graphics.lineStyle(BOLD, this.config.lineColor, 1);
 	            this.graphics.moveTo(0, 0);
 	            this.graphics.lineTo(this.mapData.numColumns * gridSize, 0);
 	            this.graphics.lineTo(this.mapData.numColumns * gridSize, this.mapData.numRows * gridSize);
@@ -239,7 +253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -249,6 +263,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	var BitParser = (function () {
+	    function BitParser() {
+	        _classCallCheck(this, BitParser);
+	    }
+
+	    _createClass(BitParser, null, [{
+	        key: "encode",
+	        value: function encode(bitArray) {
+	            var keyString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+	            //Add padding
+	            var copied = bitArray.slice();
+	            while (copied.length % 6 != 0) {
+	                copied.push(0);
+	            }var result = "";
+	            for (var i = 0; i < copied.length; i += 6) {
+	                var index = 0;
+	                for (var t = 0; t < 6; t++) {
+	                    index = index << 1 | !!copied[i + t];
+	                }
+	                result += keyString.charAt(index);
+	            }
+
+	            return result;
+	        }
+	    }, {
+	        key: "decode",
+	        value: function decode(encoded, size) {
+	            var keyString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+	            var result = [];
+	            for (var i = 0; i < encoded.length; i++) {
+	                var index = keyString.indexOf(encoded.charAt(i));
+	                for (var t = 5; t >= 0; t--) {
+	                    result.push(index >> t & 1);
+	                }
+	            }
+
+	            return result.slice(0, size);
+	        }
+	    }]);
+
+	    return BitParser;
+	})();
+
 	var MapData = (function () {
 	    function MapData(data) {
 	        _classCallCheck(this, MapData);
@@ -257,18 +316,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._numRows = data.numRows || 15;
 	        this._numColumns = data.numColumns || 15;
 	        this.robotX = data.hasOwnProperty('robotX') ? data.robotX : 1;
-	        this.robotY = data.hasOwnProperty('robotX') ? data.robotY : 1;
+	        this.robotY = data.hasOwnProperty('robotY') ? data.robotY : 1;
 	        // 0 - right, 1 - down, 2 - left, 3 - up
 	        this.robotDir = data.robotDir || 0;
+
+	        var verticalCount = (this.numColumns - 1) * this.numRows;
+	        if (data.verticalWalls) {
+	            this.verticalWalls = BitParser.decode(data.verticalWalls, verticalCount);
+	        } else {
+	            this.verticalWalls = [];
+	            for (var i = 0; i < verticalCount; i++) {
+	                //DEBUG - should be 0
+	                this.verticalWalls.push(Math.random() < 0.5);
+	            }
+	        }
+
+	        var horizontalCount = (this.numRows - 1) * this.numColumns;
+	        if (data.horizontalWalls) {
+	            this.horizontalWalls = BitParser.decode(data.horizontalWalls, horizontalCount);
+	        } else {
+	            this.horizontalWalls = [];
+	            for (var i = 0; i < horizontalCount; i++) {
+	                //DEBUG - should be 0
+	                this.horizontalWalls.push(Math.random() < 0.5);
+	            }
+	        }
 	    }
 
 	    _createClass(MapData, [{
-	        key: 'numRows',
+	        key: "wallAt",
+	        value: function wallAt(x, y) {
+	            var RIGHT = 0,
+	                DOWN = 1,
+	                LEFT = 2,
+	                UP = 3;
+
+	            var result = [0, 0, 0, 0];
+
+	            if (x == 1) result[LEFT] = true;else result[LEFT] = this.verticalWalls[(x - 2) * this.numRows + (y - 1)];
+
+	            if (x == this.numColumns) result[RIGHT] = true;else result[RIGHT] = this.verticalWalls[(x - 1) * this.numRows + (y - 1)];
+
+	            if (y == 1) result[UP] = true;else result[UP] = this.horizontalWalls[(y - 2) * this.numColumns + (x - 1)];
+
+	            if (y == this.numRows) result[DOWN] = true;else result[DOWN] = this.horizontalWalls[(y - 1) * this.numColumns + (x - 1)];
+
+	            return result;
+	        }
+	    }, {
+	        key: "numRows",
 	        get: function get() {
 	            return this._numRows;
 	        }
 	    }, {
-	        key: 'numColumns',
+	        key: "numColumns",
 	        get: function get() {
 	            return this._numColumns;
 	        }
@@ -382,7 +483,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var next = getNextMove(this.mapData.robotX, this.mapData.robotY, this.mapData.robotDir);
 
-	            if (!next) {
+	            if (this.mapData.wallAt(this.mapData.robotX, this.mapData.robotY)[this.mapData.robotDir]) {
 	                if (onError) onError();
 	            } else {
 	                this.mapData.robotX = next[0];

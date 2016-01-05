@@ -29,17 +29,30 @@ export default class MapDrawer extends PIXI.Container {
             (this.config.renderHeight - 2*GAP)/this.mapData.numRows
         );
 
-        this.graphics.lineStyle(2, this.config.lineColor, 1);
-        for (let i = 1; i < this.mapData.numColumns; i++) {
-            this.graphics.moveTo(i * gridSize, 0);
-            this.graphics.lineTo(i * gridSize, this.mapData.numRows * gridSize);
+        const BOLD = 5, LIGHT = 1;
+
+        //vertical lines
+        for (let x = 1; x < this.mapData.numColumns; x++) {
+            for (let y = 0; y < this.mapData.numRows; y++) {
+                let index = (x - 1) * this.mapData.numRows + y;
+                this.graphics.lineStyle(this.mapData.verticalWalls[index] ? BOLD : LIGHT, this.config.lineColor, 1);
+                this.graphics.moveTo(x * gridSize, y * gridSize);
+                this.graphics.lineTo(x * gridSize, (y+1) * gridSize);
+            }
         }
 
-        for (let i = 1; i < this.mapData.numColumns; i++) {
-            this.graphics.moveTo(0, i * gridSize);
-            this.graphics.lineTo(this.mapData.numColumns * gridSize, i * gridSize);
+        //horizontal lines
+        for (let y = 1; y < this.mapData.numRows; y++) {
+            for (let x = 0; x < this.mapData.numColumns; x++) {
+                let index = (y - 1) * this.mapData.numColumns + x;
+                this.graphics.lineStyle(this.mapData.horizontalWalls[index] ? BOLD : LIGHT, this.config.lineColor, 1);
+                this.graphics.moveTo(x * gridSize, y * gridSize);
+                this.graphics.lineTo((x+1) * gridSize, y * gridSize);
+            }
         }
-        this.graphics.lineStyle(5, this.config.lineColor, 1);
+
+        //border
+        this.graphics.lineStyle(BOLD, this.config.lineColor, 1);
         this.graphics.moveTo(0, 0);
         this.graphics.lineTo(this.mapData.numColumns * gridSize, 0);
         this.graphics.lineTo(this.mapData.numColumns * gridSize, this.mapData.numRows * gridSize);
