@@ -8,8 +8,13 @@
 <script src="../bower_components/pixi.js/bin/pixi.min.js"></script>
 <script src="../dist/rurple.js"></script>
 <script>
-    var player = new rurple.Player();
+    var player = new rurple.view.Player();
     player.attachAt(document.body);
+
+    var control = new rurple.control.InteractiveControl(player);
+    control.onError = function () {
+        alert('벽으로 막혀 있습니다!');
+    };
 </script>
 </body>
 </html>

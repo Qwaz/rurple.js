@@ -13,10 +13,10 @@ class RobotSprite extends PIXI.Container {
     }
 }
 
-export default class RobotControl {
-    constructor(mapDrawer, mapData) {
-        this.mapDrawer = mapDrawer;
-        this.mapData = mapData;
+export class SimpleControl {
+    constructor(view) {
+        this.mapDrawer = view.mapDrawer;
+        this.mapData = view.mapData;
 
         this.robot = new RobotSprite(this.mapDrawer.gridSize / 2 - 5);
         this.mapDrawer.addChild(this.robot);
@@ -71,5 +71,26 @@ export default class RobotControl {
             this.mapData.robotY = next[1];
             this.drawRobot();
         }
+    }
+}
+
+export class InteractiveControl extends SimpleControl {
+    constructor(view) {
+        super(view);
+
+        document.addEventListener("keydown", (e) => {
+            let left = 37, up = 38, right = 39;
+            switch (e.keyCode) {
+                case left:
+                    this.turnLeft();
+                    break;
+                case right:
+                    this.turnRight();
+                    break;
+                case up:
+                    this.step(this.onError);
+                    break;
+            }
+        });
     }
 }

@@ -57,17 +57,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
-	exports.Player = undefined;
+	exports.control = exports.view = undefined;
 
 	var _Player = __webpack_require__(1);
 
 	var player = _interopRequireWildcard(_Player);
 
+	var _RobotControl = __webpack_require__(5);
+
+	var robotControl = _interopRequireWildcard(_RobotControl);
+
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-	var Player = exports.Player = player.default;
+	var view = exports.view = {
+	    Player: player.default
+	};
+
+	var control = exports.control = {
+	    SimpleControl: robotControl.SimpleControl,
+	    InteractiveControl: robotControl.InteractiveControl
+	};
 
 /***/ },
 /* 1 */
@@ -89,10 +100,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _MapData2 = _interopRequireDefault(_MapData);
 
-	var _RobotControl = __webpack_require__(5);
-
-	var _RobotControl2 = _interopRequireDefault(_RobotControl);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -103,7 +110,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this.mapData = new _MapData2.default(mapData);
 	        this.mapDrawer = new _MapDrawer2.default(rendererConfig, this.mapData);
-	        this.robotControl = new _RobotControl2.default(this.mapDrawer, this.mapData);
 	    }
 
 	    _createClass(Player, [{
@@ -277,13 +283,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.InteractiveControl = exports.SimpleControl = undefined;
 
 	var _pixi = __webpack_require__(3);
 
@@ -317,20 +324,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return RobotSprite;
 	})(PIXI.Container);
 
-	var RobotControl = (function () {
-	    function RobotControl(mapDrawer, mapData) {
-	        _classCallCheck(this, RobotControl);
+	var SimpleControl = exports.SimpleControl = (function () {
+	    function SimpleControl(view) {
+	        _classCallCheck(this, SimpleControl);
 
-	        this.mapDrawer = mapDrawer;
-	        this.mapData = mapData;
+	        this.mapDrawer = view.mapDrawer;
+	        this.mapData = view.mapData;
 
 	        this.robot = new RobotSprite(this.mapDrawer.gridSize / 2 - 5);
 	        this.mapDrawer.addChild(this.robot);
 	        this.drawRobot();
 	    }
 
-	    _createClass(RobotControl, [{
-	        key: 'drawRobot',
+	    _createClass(SimpleControl, [{
+	        key: "drawRobot",
 	        value: function drawRobot() {
 	            var baseX = this.mapDrawer.graphics.x - this.mapDrawer.gridSize / 2;
 	            var baseY = this.mapDrawer.graphics.y - this.mapDrawer.gridSize / 2;
@@ -340,19 +347,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.robot.y = baseY + this.mapData.robotY * this.mapDrawer.gridSize;
 	        }
 	    }, {
-	        key: 'turnLeft',
+	        key: "turnLeft",
 	        value: function turnLeft() {
 	            this.mapData.robotDir = (this.mapData.robotDir + 3) % 4;
 	            this.drawRobot();
 	        }
 	    }, {
-	        key: 'turnRight',
+	        key: "turnRight",
 	        value: function turnRight() {
 	            this.mapData.robotDir = (this.mapData.robotDir + 1) % 4;
 	            this.drawRobot();
 	        }
 	    }, {
-	        key: 'step',
+	        key: "step",
 	        value: function step(onError) {
 	            var _this2 = this;
 
@@ -385,10 +392,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }]);
 
-	    return RobotControl;
+	    return SimpleControl;
 	})();
 
-	exports.default = RobotControl;
+	var InteractiveControl = exports.InteractiveControl = (function (_SimpleControl) {
+	    _inherits(InteractiveControl, _SimpleControl);
+
+	    function InteractiveControl(view) {
+	        _classCallCheck(this, InteractiveControl);
+
+	        var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(InteractiveControl).call(this, view));
+
+	        document.addEventListener("keydown", function (e) {
+	            var left = 37,
+	                up = 38,
+	                right = 39;
+	            switch (e.keyCode) {
+	                case left:
+	                    _this3.turnLeft();
+	                    break;
+	                case right:
+	                    _this3.turnRight();
+	                    break;
+	                case up:
+	                    _this3.step(_this3.onError);
+	                    break;
+	            }
+	        });
+	        return _this3;
+	    }
+
+	    return InteractiveControl;
+	})(SimpleControl);
 
 /***/ }
 /******/ ])

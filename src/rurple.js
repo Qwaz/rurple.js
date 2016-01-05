@@ -1,2 +1,10 @@
 import * as player from './Player';
-export let Player = player.default;
+export let view = {
+    Player: player.default
+};
+
+import * as robotControl from './robot/RobotControl';
+export let control = {
+    SimpleControl: robotControl.SimpleControl,
+    InteractiveControl: robotControl.InteractiveControl
+};
